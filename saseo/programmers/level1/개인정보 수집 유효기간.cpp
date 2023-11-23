@@ -5,56 +5,47 @@
 
 using namespace std;
 
-void    addDays(map<string, int>& priv_date, int months);
-void    makeTerm(map<string, int>& term_map, vector<string> terms);
+void    addDays(string& date, const int& months);
 void    dateToInt(map<string, int>& m_date, string date);
+void    makeTerm(map<string, int>& term_map, vector<string> terms);
 
 vector<int> solution(string today, vector<string> terms, vector<string> privacies) {
     vector<int> answer;
     map<string, int> term_map;
     makeTerm(term_map, terms);
-    map<string, int> i_today;
-    dateToInt(i_today, today);
     
     for (int i = 0; i < privacies.size(); ++i)
     {
-        map<string, int> priv_date;
         istringstream   iss(privacies[i]);
         string date;
         string term_type;
         iss >> date >> term_type;
-        dateToInt(priv_date, date);
-
-        // type에 따라 priv_date + expire date
-        addDays(priv_date, term_map[term_type]);
-        // today 와 대소비교. priv_date > today : 보존.
-        if (priv_date["YEAR"] < i_today["YEAR"])
-            answer.push_back(i + 1);
-        else if (priv_date["YEAR"] == i_today["YEAR"] && \
-                priv_date["MONTH"] < i_today["MONTH"])
-            answer.push_back(i + 1);
-        else if (priv_date["YEAR"] == i_today["YEAR"] && \
-                priv_date["MONTH"] == i_today["MONTH"] &&\
-                priv_date["DAY"] < i_today["DAY"])
+        addDays(date, term_map[term_type]);
+        if (date <= today)
             answer.push_back(i + 1);
     }
     return answer;
 }
 
-void addDays(map<string, int>& priv_date, int months)
+void    addDays(string& date, const int& months)
 {
-    // 일단 하루 제거
-    priv_date["DAY"] -= 1;
-    if (priv_date["DAY"] == 0)
-        priv_date["DAY"] = 28, priv_date["MONTH"] -= 1;
-    if (priv_date["MONTH"] == 0)
-        priv_date["MONTH"] = 12, priv_date["YEAR"] -= 1;
+    map<string, int> map_date;
+    dateToInt(map_date, date);
     
     // months 더해주기.
-    priv_date["YEAR"] += months / 12;
-    priv_date["MONTH"] += months % 12;
-    if (priv_date["MONTH"] > 12)
-        priv_date["MONTH"] %= 12, priv_date["YEAR"] += 1;
+    map_date["YEAR"] += months / 12;
+    map_date["MONTH"] += months % 12;
+    if (map_date["MONTH"] > 12)
+        map_date["MONTH"] %= 12, map_date["YEAR"] += 1;
+    
+    // date 변경
+    ostringstream oss;
+    oss << map_date["YEAR"] << ".";
+    if (map_date["MONTH"] < 10) oss << "0";
+    oss << map_date["MONTH"] << ".";
+    if (map_date["DAY"] < 10) oss << "0";
+    oss << map_date["DAY"];
+    date = oss.str();
 }
 
 void    dateToInt(map<string, int>& m_date, string date)
@@ -76,7 +67,6 @@ void    makeTerm(map<string, int>& term_map, vector<string> terms)
     {
         string term_type;
         int expire_duration;
-        
         istringstream   iss;
         iss.str(terms[i]);
         iss >> term_type >> expire_duration;
