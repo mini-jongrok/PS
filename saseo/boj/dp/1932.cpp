@@ -36,6 +36,6 @@ int getMaxRoute(const int& n, int h, int w)
 	int& ret = cache[h][w];
 	if (ret != -1) return ret;
 
-	ret = max(getMaxRoute(n, h + 1, w), getMaxRoute(n, h + 1, w + 1));
+	ret = tri[h][w] + max(getMaxRoute(n, h + 1, w), getMaxRoute(n, h + 1, w + 1));
 	return ret;
 }
