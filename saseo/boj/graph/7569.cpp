@@ -1,15 +1,16 @@
 #include <cstdio>
-#include <queue>
+#include <deque>
 using namespace std;
 
 typedef struct {
-	int hi;
-	int ni;
-	int mi;
+	char hi;
+	char ni;
+	char mi;
 } coordinate;
 
-int n, m, h;
+int n, m, h, zero;
 int box[101][101][101];
+deque<coordinate> q;
 int dh[] = {-1,1,0,0,0,0};
 int dn[] = {0,0,0,0,-1,1};
 int dm[] = {0,0,-1,1,0,0};
@@ -17,10 +18,6 @@ int dm[] = {0,0,-1,1,0,0};
 void input();
 void solve();
 int bfs();
-void init_queue(queue<coordinate>& q);
-int min(int a, int b);
-int max(int a, int b);
-bool allGood();
 
 int main()
 {
@@ -32,7 +29,7 @@ int main()
 void solve()
 {
 	int result = bfs();
-	if (allGood())
+	if (zero == 0)
 		printf("%d\n", result);
 	else
 		printf("-1\n");
@@ -41,12 +38,10 @@ void solve()
 int bfs()
 {
 	int ret = 0;
-	queue<coordinate> q;
-	init_queue(q);
 	while (!q.empty())
 	{
 		coordinate cur = q.front();
-		q.pop();
+		q.pop_front();
 		int cur_value = box[cur.hi][cur.ni][cur.mi];
 		for (int i = 0; i < 6; ++i)
 		{
@@ -59,65 +54,34 @@ int bfs()
 				box[next.hi][next.ni][next.mi] == 0)
 			{
 				box[next.hi][next.ni][next.mi] = cur_value + 1;
-				q.push(next);
+				q.push_back(next);
 				ret = max(cur_value + 1, ret);
+				zero--;
 			}
 		}
 	}
 	return ret > 0 ? ret - 1 : 0;
 }
 
-void init_queue(queue<coordinate>& q)
-{
-	for (int i = 0; i < h; ++i)
-	{
-		for (int j = 0; j < n; ++j)
-		{
-			for (int k = 0; k < m; ++k)
-			{
-				coordinate tmp = {i, j, k};
-				if (box[i][j][k] == 1)
-					q.push(tmp);
-			}
-		}
-	}
-}
-
-bool allGood()
-{
-	for (int i = 0; i < h; ++i)
-	{
-		for (int j = 0; j < n; ++j)
-		{
-			for (int k = 0; k < m; ++k)
-				if (box[i][j][k] == 0)
-					return false;
-		}
-	}
-	return true;
-}
-
 void input()
 {
+	zero = 0;
 	scanf("%d %d %d", &m, &n, &h);
 	for (int i = 0; i < h; ++i)
 	{
 		for (int j = 0; j < n; ++j)
 		{
 			for (int k = 0; k < m; ++k)
+			{
 				scanf("%d", &box[i][j][k]);
+				if (box[i][j][k] == 1)
+				{
+					coordinate tmp = {i, j, k};
+					q.push_back(tmp);
+				}
+				if (box[i][j][k] == 0)
+					zero++;
+			}
 		}
 	}
-}
-
-int max(int a, int b)
-{
-	if (a >= b) return a;
-	return b;
-}
-
-int min(int a, int b)
-{
-	if (a > b) return b;
-	return a;
 }
