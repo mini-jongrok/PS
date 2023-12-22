@@ -1,5 +1,5 @@
-#include <cstdio>
-#include <deque>
+#include <queue>
+#include <iostream>
 using namespace std;
 
 typedef struct {
@@ -8,12 +8,12 @@ typedef struct {
 	char mi;
 } coordinate;
 
-int n, m, h, zero;
-int box[101][101][101];
-deque<coordinate> q;
-int dh[] = {-1,1,0,0,0,0};
-int dn[] = {0,0,0,0,-1,1};
-int dm[] = {0,0,-1,1,0,0};
+int n, m, h, whole, zero;
+char box[101][101][101];
+queue<coordinate> q;
+char dh[] = {-1,1,0,0,0,0};
+char dn[] = {0,0,0,0,-1,1};
+char dm[] = {0,0,-1,1,0,0};
 
 void input();
 void solve();
@@ -28,59 +28,77 @@ int main()
 
 void solve()
 {
+    if (whole == zero)
+    {
+        cout << "-1\n";
+        return ;
+    }
 	int result = bfs();
 	if (zero == 0)
-		printf("%d\n", result);
+		cout << result << "\n";
 	else
-		printf("-1\n");
+		cout << "-1\n";
 }
 
 int bfs()
 {
-	int ret = 0;
-	while (!q.empty())
+	int ret = -1;
+	int len = q.size();
+	while (len)
 	{
-		coordinate cur = q.front();
-		q.pop_front();
-		int cur_value = box[cur.hi][cur.ni][cur.mi];
-		for (int i = 0; i < 6; ++i)
+		ret++;
+		for (int node = 0; node < len; ++node)
 		{
-			coordinate next = {cur.hi + dh[i],
-								cur.ni + dn[i],
-								cur.mi + dm[i]};
-			if (next.hi > -1 && next.hi < h &&
-				next.ni > -1 && next.ni < n &&
-				next.mi > -1 && next.mi < m &&
-				box[next.hi][next.ni][next.mi] == 0)
+			coordinate cur = q.front();
+			q.pop();
+			for (int i = 0; i < 6; ++i)
 			{
-				box[next.hi][next.ni][next.mi] = cur_value + 1;
-				q.push_back(next);
-				ret = max(cur_value + 1, ret);
-				zero--;
+				coordinate next = {cur.hi + dh[i],
+									cur.ni + dn[i],
+									cur.mi + dm[i]};
+				if (next.hi > -1 && next.hi < h &&
+					next.ni > -1 && next.ni < n &&
+					next.mi > -1 && next.mi < m &&
+					box[next.hi][next.ni][next.mi] == '0')
+				{
+					box[next.hi][next.ni][next.mi] = '1';
+					q.push(next);
+					zero--;
+				}
 			}
 		}
+		len = q.size();
 	}
-	return ret > 0 ? ret - 1 : 0;
+	return ret;
 }
 
 void input()
 {
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
 	zero = 0;
-	scanf("%d %d %d", &m, &n, &h);
+	cin >> m >> n >> h;
 	for (int i = 0; i < h; ++i)
 	{
 		for (int j = 0; j < n; ++j)
 		{
 			for (int k = 0; k < m; ++k)
 			{
-				scanf("%d", &box[i][j][k]);
-				if (box[i][j][k] == 1)
-				{
-					coordinate tmp = {i, j, k};
-					q.push_back(tmp);
-				}
-				if (box[i][j][k] == 0)
-					zero++;
+				char tmp;
+				char trash;
+				cin >> tmp;
+				if (tmp == '-')
+					cin >> trash;
+                else
+                {
+                    whole++;
+				    box[i][j][k] = tmp;
+				    coordinate coor = {i, j, k};
+				    if (tmp == '1')
+				    	q.push(coor);
+				    else if (tmp == '0')
+					    zero++;
+                }
 			}
 		}
 	}
