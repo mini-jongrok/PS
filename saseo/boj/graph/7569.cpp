@@ -1,26 +1,23 @@
-#include <cstdio>
 #include <queue>
+#include <iostream>
 using namespace std;
 
 typedef struct {
-	int hi;
-	int ni;
-	int mi;
+	char hi;
+	char ni;
+	char mi;
 } coordinate;
 
-int n, m, h;
-int box[101][101][101];
-int dh[] = {-1,1,0,0,0,0};
-int dn[] = {0,0,0,0,-1,1};
-int dm[] = {0,0,-1,1,0,0};
+int n, m, h, whole, zero;
+char box[101][101][101];
+queue<coordinate> q;
+char dh[] = {-1,1,0,0,0,0};
+char dn[] = {0,0,0,0,-1,1};
+char dm[] = {0,0,-1,1,0,0};
 
 void input();
 void solve();
 int bfs();
-void init_queue(queue<coordinate>& q);
-int min(int a, int b);
-int max(int a, int b);
-bool allGood();
 
 int main()
 {
@@ -31,93 +28,78 @@ int main()
 
 void solve()
 {
+    if (whole == zero)
+    {
+        cout << "-1\n";
+        return ;
+    }
 	int result = bfs();
-	if (allGood())
-		printf("%d\n", result);
+	if (zero == 0)
+		cout << result << "\n";
 	else
-		printf("-1\n");
+		cout << "-1\n";
 }
 
 int bfs()
 {
-	int ret = 0;
-	queue<coordinate> q;
-	init_queue(q);
-	while (!q.empty())
+	int ret = -1;
+	int len = q.size();
+	while (len)
 	{
-		coordinate cur = q.front();
-		q.pop();
-		int cur_value = box[cur.hi][cur.ni][cur.mi];
-		for (int i = 0; i < 6; ++i)
+		ret++;
+		for (int node = 0; node < len; ++node)
 		{
-			coordinate next = {cur.hi + dh[i],
-								cur.ni + dn[i],
-								cur.mi + dm[i]};
-			if (next.hi > -1 && next.hi < h &&
-				next.ni > -1 && next.ni < n &&
-				next.mi > -1 && next.mi < m &&
-				box[next.hi][next.ni][next.mi] == 0)
+			coordinate cur = q.front();
+			q.pop();
+			for (int i = 0; i < 6; ++i)
 			{
-				box[next.hi][next.ni][next.mi] = cur_value + 1;
-				q.push(next);
-				ret = max(cur_value + 1, ret);
+				coordinate next = {cur.hi + dh[i],
+									cur.ni + dn[i],
+									cur.mi + dm[i]};
+				if (next.hi > -1 && next.hi < h &&
+					next.ni > -1 && next.ni < n &&
+					next.mi > -1 && next.mi < m &&
+					box[next.hi][next.ni][next.mi] == '0')
+				{
+					box[next.hi][next.ni][next.mi] = '1';
+					q.push(next);
+					zero--;
+				}
 			}
 		}
+		len = q.size();
 	}
-	return ret > 0 ? ret - 1 : 0;
-}
-
-void init_queue(queue<coordinate>& q)
-{
-	for (int i = 0; i < h; ++i)
-	{
-		for (int j = 0; j < n; ++j)
-		{
-			for (int k = 0; k < m; ++k)
-			{
-				coordinate tmp = {i, j, k};
-				if (box[i][j][k] == 1)
-					q.push(tmp);
-			}
-		}
-	}
-}
-
-bool allGood()
-{
-	for (int i = 0; i < h; ++i)
-	{
-		for (int j = 0; j < n; ++j)
-		{
-			for (int k = 0; k < m; ++k)
-				if (box[i][j][k] == 0)
-					return false;
-		}
-	}
-	return true;
+	return ret;
 }
 
 void input()
 {
-	scanf("%d %d %d", &m, &n, &h);
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	zero = 0;
+	cin >> m >> n >> h;
 	for (int i = 0; i < h; ++i)
 	{
 		for (int j = 0; j < n; ++j)
 		{
 			for (int k = 0; k < m; ++k)
-				scanf("%d", &box[i][j][k]);
+			{
+				char tmp;
+				char trash;
+				cin >> tmp;
+				if (tmp == '-')
+					cin >> trash;
+                else
+                {
+                    whole++;
+				    box[i][j][k] = tmp;
+				    coordinate coor = {i, j, k};
+				    if (tmp == '1')
+				    	q.push(coor);
+				    else if (tmp == '0')
+					    zero++;
+                }
+			}
 		}
 	}
-}
-
-int max(int a, int b)
-{
-	if (a >= b) return a;
-	return b;
-}
-
-int min(int a, int b)
-{
-	if (a > b) return b;
-	return a;
 }
