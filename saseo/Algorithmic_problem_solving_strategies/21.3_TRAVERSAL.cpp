@@ -1,8 +1,6 @@
 #include <iostream>
 #include <deque>
 using namespace std;
-#define RED "\033[31m"                /* Red */
-#define RESET "\033[0m"
 
 int tc, n;
 deque<int> pre;
@@ -25,9 +23,7 @@ void solve() {
     while (tc--)
     {
         input_case();
-        cout << RED;
         print_post(make_pair(0, n - 1), make_pair(0, n - 1));
-        cout << RESET << "\n";
     }
 }
 
